@@ -1,0 +1,13 @@
+#!/bin/bash
+
+ttl="$(echo $(( 8 + $(who | cut -d ' ' -f 12 | cut -d ':' -f 1 | sed 's/0//g' ))):$( who | cut -d ' ' -f 12 | cut -d ':' -f 2))"
+trm="$(( $(( $( echo $ttl | cut -d ':' -f 1 ) * 60 + $( echo $ttl | cut -d ':' -f 2 ) )) - $(( $( date +%H ) * 60 + $( date +%M ) )) ))"
+trh="$(( $trm / 60 ))"
+trm="$(( $trm - $trh * 60 ))"
+echo "It's 5pm at $ttl"
+if [[ "$( echo $trm | wc -m )" -gt '2' ]]
+then
+  echo "Time remaining is 0$trh:$trm"
+else
+  echo "Time remaining is 0$trh:0$trm"
+fi

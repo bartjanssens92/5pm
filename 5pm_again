@@ -1,0 +1,140 @@
+#!/bin/bash
+#
+# Help
+showhelp () {
+cat <<eof
+
+  This script is used to calculate when it's "5pm".
+  It calculates the time that the user can leave after working the defined workinghours.
+  This is done by using the time that the user first logged in.
+
+  Options:
+    --more | -m      : Show some more output.
+    --quiet | -q     : Don't show any output, for running on startup
+    --workhours | -w : Set the workhours, defaults to '08:30'
+    --debug | -d     : Enable debug mode, aka echo some params
+
+eof
+  exit
+}
+
+# Params
+params () {
+  # Optional params
+  if [ -z $debug ]; then debug=false ; fi
+  if [ -z $workhours ]; then debug 'workhours not given'; workhours='8:30'; fi
+  if [ -z $quiet ]; then quiet=false; fi
+  if [ -z $more ]; then more=false; fi
+  # Needed for script
+  dateYmd=$( date +%Y%m%d )
+  currentH=$( date +%H )
+  currentM=$( date +%M )
+  # Update this!
+  currentdir='/home/bjanssens/Inuits/Scripts/5pm'
+  tempfile="${currentdir}/.${dateYmd}.tmp"
+  workhoursH=$( echo $workhours | cut -d ':' -f1 )
+  workhoursM=$( echo $workhours | cut -d ':' -f2 )
+}
+
+# Methods
+debug () {
+  if $debug
+  then
+    echo "Debug: $@"
+  fi
+}
+
+# Get the uptime
+# Check if the machine was rebooted
+get_logintime () {
+  if [ -f "$tempfile" ]
+  then
+    logintime=$( cat $tempfile )
+    debug Got uptime from tempfile
+  else
+    logintime=$( last | awk '{ print $7 }' | head -n 1 )
+    echo "$logintime" > ${tempfile}
+    debug Wrote logintime to tempfile
+    # Clean up old tempfiles
+    find $currentdir -name *.tmp -ctime +2 -delete
+  fi
+  debug logintime: $logintime
+  logintimeH=$( echo $logintime | cut -d ':' -f1 )
+  logintimeM=$( echo $logintime | cut -d ':' -f2 )
+}
+
+# Calculate the time to leave
+get_leave () {
+  leaveH=$( echo "$logintimeH + $workhoursH + ( $logintimeM + $workhoursM ) / 60" | bc )
+  leaveM=$( echo "( $logintimeM + $workhoursM ) % 60" | bc )
+  leaveS=$( echo "$leaveH * 3600 + $leaveM * 60" | bc )
+  leave=$( echo "${leaveH}:${leaveM}" )
+  debug Leavingtime: $leave
+}
+
+# Calculate time remaining
+get_remaining () {
+  currentS=$( echo "$currentH * 3600 + $currentM * 60" | bc )
+  remainingS=$( echo "$leaveS - $currentS" | bc )
+  remainingH=$(( $remainingS / 3600 ))
+  remainingM=$( echo "( $remainingS - $remainingH * 3600 ) / 60" | bc )
+  if (( $( echo "$remainingH" | wc -m ) < 3 ))
+  then
+    remainingH=$( echo "0${remainingH}" )
+  fi
+  if (( $( echo "$remainingM" | wc -m ) < 3 ))
+  then
+    remainingM=$( echo "0${remainingM}" )
+  fi
+  remaining=$( echo "${remainingH}:${remainingM}" )
+  debug Remaining: $remaining
+}
+
+# Print the output
+nice_print () {
+  echo "It's 5pm at $leave"
+  echo "Time reamaining is $remaining"
+  if $more
+  then
+    echo "First logged in at $logintime"
+    echo "Workhours set to $workhours"
+  fi
+}
+
+while test -n "$1"
+do
+  case "$1" in
+    --help|-h)
+      showhelp
+      ;;
+    --debug|-d)
+      debug=true
+      shift
+      ;;
+    --more|-m)
+      more=true
+      shift
+      ;;
+    --quiet|-q)
+      quiet=true
+      shift
+      ;;
+    --workhours|-w)
+      shift
+      workhours=$1
+      shift
+      ;;
+    *)
+      showhelp
+      ;;
+  esac
+done
+
+params
+get_logintime
+get_leave
+get_remaining
+if ! $quiet
+then
+  nice_print
+fi
