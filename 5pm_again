@@ -13,6 +13,7 @@ cat <<eof
     --quiet | -q     : Don't show any output, for running on startup
     --workhours | -w : Set the workhours, defaults to '08:30'
     --debug | -d     : Enable debug mode, aka echo some params
+    --start | -s     : Don't use last to get the login time but the current time
 
 eof
   exit
@@ -25,6 +26,7 @@ params () {
   if [ -z $workhours ]; then debug 'workhours not given'; workhours='08:30'; fi
   if [ -z $quiet ]; then quiet=false; fi
   if [ -z $more ]; then more=false; fi
+  if [ -z $starts ]; then starts=false; fi
   # Needed for script
   dateYmd=$( date +%Y%m%d )
   currentH=$( date +%H )
@@ -61,7 +63,12 @@ get_logintime () {
     logintime=$( cat $tempfile )
     debug Got uptime from tempfile
   else
-    logintime=$( last | awk '{ print $7 }' | head -n 1 )
+    if $starts
+    then
+      logintime="$currentH:$currentM"
+    else
+      logintime=$( last | awk '{ print $7 }' | head -n 1 )
+    fi
     echo "$logintime" > ${tempfile}
     debug Wrote logintime to tempfile
     # Clean up old tempfiles
@@ -115,6 +122,10 @@ do
   case "$1" in
     --help|-h)
       showhelp
+      ;;
+    --start|-s)
+      starts=true
+      shift
       ;;
     --debug|-d)
       debug=true
