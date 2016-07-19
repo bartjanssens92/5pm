@@ -22,7 +22,7 @@ eof
 params () {
   # Optional params
   if [ -z $debug ]; then debug=false ; fi
-  if [ -z $workhours ]; then debug 'workhours not given'; workhours='8:30'; fi
+  if [ -z $workhours ]; then debug 'workhours not given'; workhours='08:30'; fi
   if [ -z $quiet ]; then quiet=false; fi
   if [ -z $more ]; then more=false; fi
   # Needed for script
@@ -34,6 +34,15 @@ params () {
   tempfile="${currentdir}/.${dateYmd}.tmp"
   workhoursH=$( echo $workhours | cut -d ':' -f1 )
   workhoursM=$( echo $workhours | cut -d ':' -f2 )
+  regexHHMM='^[0-2]{0,1}[0-9]{1}\:[0-9]{2}$'
+  # Param checking
+  if [ ! -z $workhours ]; then
+    if [[ ! $workhours =~ $regexHHMM ]]; then
+      echo 'Error: Workhours did not match the expected format, please use "hh:mm"'
+      echo "Error: Regex that is used to match agains: $regexHHMM"
+      exit 1
+    fi
+  fi
 }
 
 # Methods
