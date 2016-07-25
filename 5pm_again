@@ -54,6 +54,22 @@ debug () {
   fi
 }
 
+# Format the Seconds to HH:MM
+# Requiers one arugment: xxxxxxxS
+parse_nice () {
+  S=$1
+  H=$(( $S / 3600 ))
+  M=$( echo "( $S - $H * 3600 ) / 60" | bc )
+  if (( $( echo "$H" | wc -m ) < 3 ))
+  then
+    H=$( echo "0${H}" )
+  fi
+  if (( $( echo "$M" | wc -m ) < 3 ))
+  then
+    M=$( echo "0${M}" )
+  fi
+  echo "${H}:${M}"
+}
 # Get the uptime
 # Check if the machine was rebooted
 get_logintime () {
@@ -84,11 +100,7 @@ get_leave () {
   leaveH=$( echo "$logintimeH + $workhoursH + ( $logintimeM + $workhoursM ) / 60" | bc )
   leaveM=$( echo "( $logintimeM + $workhoursM ) % 60" | bc )
   leaveS=$( echo "$leaveH * 3600 + $leaveM * 60" | bc )
-  if (( $( echo "$leaveM" | wc -m ) < 3 ))
-  then
-    leaveM=$( echo "0${leaveM}" )
-  fi
-  leave=$( echo "${leaveH}:${leaveM}" )
+  leave=$( parse_nice $leaveS )
   debug Leavingtime: $leave
 }
 
@@ -96,35 +108,15 @@ get_leave () {
 get_remaining () {
   currentS=$( echo "$currentH * 3600 + $currentM * 60" | bc )
   remainingS=$( echo "$leaveS - $currentS" | bc )
-  remainingH=$(( $remainingS / 3600 ))
-  remainingM=$( echo "( $remainingS - $remainingH * 3600 ) / 60" | bc )
-  if (( $( echo "$remainingH" | wc -m ) < 3 ))
-  then
-    remainingH=$( echo "0${remainingH}" )
-  fi
-  if (( $( echo "$remainingM" | wc -m ) < 3 ))
-  then
-    remainingM=$( echo "0${remainingM}" )
-  fi
-  remaining=$( echo "${remainingH}:${remainingM}" )
+  remaining=$( parse_nice $remainingS)
   debug Remaining: $remaining
 }
 
 # Calculate the time worked
 get_worked () {
   workedS=$(( $currentS - $logintimeS ))
-  workedH=$(( $workedS / 3600 ))
-  workedM=$( echo "( $workedS - $workedH * 3600 ) / 60" | bc )
-  if (( $( echo "$workedH" | wc -m ) < 3 ))
-  then
-    workedH=$( echo "0${workedH}" )
-  fi
-  if (( $( echo "$workedM" | wc -m ) < 3 ))
-  then
-    workedM=$( echo "0${workedM}" )
-  fi
-  workedhours=$( echo "${workedH}:${workedM}" )
-  debug Worked: $worked
+  workedhours=$( parse_nice $workedS )
+  debug Worked: $workedhours
 }
 
 # Print the output
