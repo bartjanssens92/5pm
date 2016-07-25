@@ -13,6 +13,7 @@ Options:
     --workhours | -w : Set the workhours, defaults to '08:30'
     --debug | -d     : Enable debug mode, aka echo some params
     --start | -s     : Don't use last to get the login time but the current time
+    --version | -v   : Get the version
 
 eof
   exit
@@ -26,6 +27,7 @@ params () {
   if [ -z $quiet ]; then quiet=false; fi
   if [ -z $more ]; then more=false; fi
   if [ -z $starts ]; then starts=false; fi
+  if [ -z $version ]; then version=false; fi
   # Needed for script
   dateYmd=$( date +%Y%m%d )
   currentH=$( date +%H )
@@ -119,6 +121,15 @@ get_worked () {
   debug Worked: $workedhours
 }
 
+# Get version by getting the amount of git commits
+get_version () {
+  cd $currentdir
+  version=$( git log | grep commit | wc -l )
+  echo "Version: 1.0.$version"
+  cd - 2>&- 1>&-
+  exit
+}
+
 # Print the output
 nice_print () {
   echo "It's 5pm at $leave"
@@ -158,6 +169,10 @@ do
       workhours=$1
       shift
       ;;
+    --version|-v)
+      version=true
+      shift
+      ;;
     *)
       showhelp
       ;;
@@ -165,11 +180,13 @@ do
 done
 
 params
+if $version; then
+  get_version
+fi
 get_logintime
 get_leave
 get_remaining
 get_worked
-if ! $quiet
-then
+if ! $quiet; then
   nice_print
 fi
