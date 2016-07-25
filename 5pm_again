@@ -7,8 +7,7 @@ cat <<eof
   This script is used to calculate when it's "5pm".
   It calculates the time that the user can leave after working the defined workinghours.
   This is done by using the time that the user first logged in.
-
-  Options:
+Options:
     --more | -m      : Show some more output.
     --quiet | -q     : Don't show any output, for running on startup
     --workhours | -w : Set the workhours, defaults to '08:30'
@@ -77,6 +76,7 @@ get_logintime () {
   debug logintime: $logintime
   logintimeH=$( echo $logintime | cut -d ':' -f1 )
   logintimeM=$( echo $logintime | cut -d ':' -f2 )
+  logintimeS=$(( $( echo $logintimeH | sed 's/^0//g' )*60*60 + $logintimeM*60 ))
 }
 
 # Calculate the time to leave
@@ -110,6 +110,23 @@ get_remaining () {
   debug Remaining: $remaining
 }
 
+# Calculate the time worked
+get_worked () {
+  workedS=$(( $currentS - $logintimeS ))
+  workedH=$(( $workedS / 3600 ))
+  workedM=$( echo "( $workedS - $workedH * 3600 ) / 60" | bc )
+  if (( $( echo "$workedH" | wc -m ) < 3 ))
+  then
+    workedH=$( echo "0${workedH}" )
+  fi
+  if (( $( echo "$workedM" | wc -m ) < 3 ))
+  then
+    workedM=$( echo "0${workedM}" )
+  fi
+  workedhours=$( echo "${workedH}:${workedM}" )
+  debug Worked: $worked
+}
+
 # Print the output
 nice_print () {
   echo "It's 5pm at $leave"
@@ -118,6 +135,7 @@ nice_print () {
   then
     echo "First logged in at $logintime"
     echo "Workhours set to $workhours"
+    echo "Hours worked are $workedhours"
   fi
 }
 
@@ -158,6 +176,7 @@ params
 get_logintime
 get_leave
 get_remaining
+get_worked
 if ! $quiet
 then
   nice_print
