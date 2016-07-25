@@ -84,6 +84,10 @@ get_leave () {
   leaveH=$( echo "$logintimeH + $workhoursH + ( $logintimeM + $workhoursM ) / 60" | bc )
   leaveM=$( echo "( $logintimeM + $workhoursM ) % 60" | bc )
   leaveS=$( echo "$leaveH * 3600 + $leaveM * 60" | bc )
+  if (( $( echo "$leaveM" | wc -m ) < 3 ))
+  then
+    leaveM=$( echo "0${leaveM}" )
+  fi
   leave=$( echo "${leaveH}:${leaveM}" )
   debug Leavingtime: $leave
 }
