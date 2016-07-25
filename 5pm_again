@@ -133,7 +133,7 @@ get_version () {
 # Print the output
 nice_print () {
   echo "It's 5pm at $leave"
-  echo "Time reamaining is $remaining"
+  echo "Time remaining is $remaining"
   if $more
   then
     echo "First logged in at $logintime"
