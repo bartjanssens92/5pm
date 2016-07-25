@@ -33,7 +33,7 @@ params () {
   currentH=$( date +%H )
   currentM=$( date +%M )
   # Update this!
-  currentdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  currentdir='/home/bjanssens/Inuits/Scripts/5pm'
   tempfile="${currentdir}/.${dateYmd}.tmp"
   workhoursH=$( echo $workhours | cut -d ':' -f1 )
   workhoursM=$( echo $workhours | cut -d ':' -f2 )
