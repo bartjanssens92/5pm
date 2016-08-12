@@ -48,6 +48,19 @@ params () {
   fi
 }
 
+# Read the config from a config file
+config () {
+  currentD=$( date +%a )
+  configfile='configfile'
+  for config in $( cat $configfile )
+  do
+    if [[ "$config" == "$currentD:" ]]
+    then
+      echo $config
+    fi
+  done
+}
+
 # Methods
 debug () {
   if $debug
@@ -141,6 +154,8 @@ nice_print () {
     echo "Hours worked are $workedhours"
   fi
 }
+
+#config
 
 while test -n "$1"
 do
