@@ -15,6 +15,12 @@ Options:
     --start | -s     : Don't use last to get the login time but the current time
     --version | -v   : Get the version
 
+  Configuration based on a daily fasion can be done in the /home/$whoami/.5pm/config file.
+  Here one can add days where there are specific options. This is done in the following format:
+    Wed=--workhours='07:50' -m
+  This line sets the script to use 07:50 as workhours on Wednesday and also print more output that day.
+  The matching is done based on 'date +%a'.
+
 eof
   exit
 }
