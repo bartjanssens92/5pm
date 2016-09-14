@@ -19,6 +19,29 @@ eof
   exit
 }
 
+# Methods
+debug () {
+  if $debug
+  then
+    echo "Debug: $@"
+  fi
+}
+
+# Configparams
+configparams () {
+  # Params needed for config
+  username=$( whoami )
+  # Directories and files
+  currentdir="/home/${username}/.5pm"
+  configfile="${currentdir}/config"
+  tempfile="${currentdir}/.${dateYmd}.tmp"
+  # Check if users .5pm directory exists
+  if [ ! -d $currentdir ]; then
+    debug Creating "$currentdir" directory
+    mkdir $currentdir
+  fi
+}
+
 # Params
 params () {
   # Optional params
@@ -29,12 +52,10 @@ params () {
   if [ -z $starts ]; then starts=false; fi
   if [ -z $version ]; then version=false; fi
   # Needed for script
+  # Time stamps
   dateYmd=$( date +%Y%m%d )
   currentH=$( date +%H )
   currentM=$( date +%M )
-  # Update this!
-  currentdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  tempfile="${currentdir}/.${dateYmd}.tmp"
   workhoursH=$( echo $workhours | cut -d ':' -f1 )
   workhoursM=$( echo $workhours | cut -d ':' -f2 )
   regexHHMM='^[0-2]{0,1}[0-9]{1}\:[0-9]{2}$'
@@ -50,22 +71,27 @@ params () {
 
 # Read the config from a config file
 config () {
-  currentD=$( date +%a )
-  configfile='configfile'
-  for config in $( cat $configfile )
-  do
-    if [[ "$config" == "$currentD:" ]]
-    then
-      echo $config
-    fi
-  done
-}
-
-# Methods
-debug () {
-  if $debug
-  then
-    echo "Debug: $@"
+  if [ -f "$configfile" ]; then
+    #   %a   locale's abbreviated weekday name (e.g., Sun)
+    currentD=$( date +%a )
+    for config in $( cat $configfile | sed 's/ /_/g' )
+    do
+      day=$( echo $config | cut -d '=' -f 1 )
+      if [[ "${day}" -eq "$currentD" ]]
+      then
+        configOpts=$( echo $config | sed "s/$day=//g" | sed 's/_/ /g' )
+        for optionfull in $configOpts
+        do
+          optionkey=$( echo $optionfull | cut -d '=' -f 1 )
+          if [ "${optionkey}" == "--workhours" ]; then
+            optionvalue=$( echo $optionfull | cut -d '=' -f 2 )
+            workhours=$optionvalue | sed "s/'//g"
+          fi
+        done
+      fi
+    done
+  else
+    debug No config file found, using defaults
   fi
 }
 
@@ -85,6 +111,7 @@ parse_nice () {
   fi
   echo "${H}:${M}"
 }
+
 # Get the uptime
 # Check if the machine was rebooted
 get_logintime () {
@@ -155,7 +182,8 @@ nice_print () {
   fi
 }
 
-#config
+configparams
+config
 
 while test -n "$1"
 do
