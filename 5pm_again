@@ -85,7 +85,7 @@ config () {
           optionkey=$( echo $optionfull | cut -d '=' -f 1 )
           if [ "${optionkey}" == "--workhours" ]; then
             optionvalue=$( echo $optionfull | cut -d '=' -f 2 )
-            workhours=$optionvalue | sed "s/'//g"
+            workhours=$( echo $optionvalue | sed "s/'//g" )
           fi
         done
       fi
