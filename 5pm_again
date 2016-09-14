@@ -52,6 +52,7 @@ params () {
   if [ -z $starts ]; then starts=false; fi
   if [ -z $version ]; then version=false; fi
   # Needed for script
+  installdir=$( dirname "${BASH_SOURCE[0]}" )
   # Time stamps
   dateYmd=$( date +%Y%m%d )
   currentH=$( date +%H )
@@ -163,7 +164,7 @@ get_worked () {
 
 # Get version by getting the amount of git commits
 get_version () {
-  cd $currentdir
+  cd $installdir
   version=$( git log | grep commit | wc -l )
   echo "Version: 1.0.$version"
   cd - 2>&- 1>&-
