@@ -83,6 +83,13 @@ config () {
     currentD=$( date +%a )
     for config in $( cat $configfile | sed 's/ /_/g' )
     do
+      configwunder=$( echo $config | sed 's/_/ /g' )
+      regexConfig='(Mon|Tue|Wed|Thu|Fri)\=((\s{0,1}(--workhours|-w)\=\"[0-2]{0,1}[0-9]{1}\:[0-9]{2}\")|\s(-m)){0,5}'
+      if [[ ! $configwunder =~ $regexConfig ]]
+      then
+        echo "Error: Configuration syntax issue on line: \` $configwunder \`"
+        #exit 1
+      fi
       day=$( echo $config | cut -d '=' -f 1 )
       if [[ "${day}" -eq "$currentD" ]]
       then
@@ -92,7 +99,7 @@ config () {
           optionkey=$( echo $optionfull | cut -d '=' -f 1 )
           if [ "${optionkey}" == "--workhours" ]; then
             optionvalue=$( echo $optionfull | cut -d '=' -f 2 )
-            workhours=$( echo $optionvalue | sed "s/'//g" )
+            workhours=$( echo $optionvalue | sed 's/"//g' )
           fi
         done
       fi
