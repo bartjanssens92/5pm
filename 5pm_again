@@ -40,7 +40,6 @@ configparams () {
   # Directories and files
   currentdir="/home/${username}/.5pm"
   configfile="${currentdir}/config"
-  tempfile="${currentdir}/.${dateYmd}.tmp"
   # Check if users .5pm directory exists
   if [ ! -d $currentdir ]; then
     debug Creating "$currentdir" directory
@@ -66,6 +65,8 @@ params () {
   workhoursH=$( echo $workhours | cut -d ':' -f1 )
   workhoursM=$( echo $workhours | cut -d ':' -f2 )
   regexHHMM='^[0-2]{0,1}[0-9]{1}\:[0-9]{2}$'
+  # Tempfile
+  tempfile="${currentdir}/.${dateYmd}.tmp"
   # Param checking
   if [ ! -z $workhours ]; then
     if [[ ! $workhours =~ $regexHHMM ]]; then
