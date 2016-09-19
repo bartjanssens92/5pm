@@ -92,7 +92,7 @@ config () {
         #exit 1
       fi
       day=$( echo $config | cut -d '=' -f 1 )
-      if [[ "${day}" -eq "$currentD" ]]
+      if [[ "${day}" == "$currentD" ]]
       then
         configOpts=$( echo $config | sed "s/$day=//g" | sed 's/_/ /g' )
         for optionfull in $configOpts
