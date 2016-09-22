@@ -206,7 +206,7 @@ nice_print () {
 # Make some snappy remark based upon $remaining
 snappy () {
   # 8 hours remaining
-  if (( $remainingS <= 28800 )) && (( $remainingS > 25200 ))
+  if (( $remainingS > 25200 ))
   then
     echo "You just started!"
   # 7 hours remaining
@@ -224,7 +224,7 @@ snappy () {
   # 4 hours remaining
   elif (( $remainingS <= 14400 )) && (( $remainingS > 10800 ))
   then
-    echo "luckily your you isn't very mentally challanging."
+    echo "Luckily your job isn't very mentally challanging."
   # 3 hours remaining
   elif (( $remainingS <= 10800 )) && (( $remainingS > 7200 ))
   then

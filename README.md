@@ -12,6 +12,7 @@ Options:
     --debug | -d     : Enable debug mode, aka echo some params
     --start | -s     : Don't use last to get the login time but the current time
     --version | -v   : Get the version
+    --snappy | -sn   : Get a snappy comment back
 
   Configuration based on a daily fasion can be done in the /home//.5pm/config file.
   Here one can add days where there are specific options. This is done in the following format:
