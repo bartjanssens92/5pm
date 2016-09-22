@@ -14,6 +14,7 @@ Options:
     --debug | -d     : Enable debug mode, aka echo some params
     --start | -s     : Don't use last to get the login time but the current time
     --version | -v   : Get the version
+    --snappy | -sn   : Get a snappy comment back
 
   Configuration based on a daily fasion can be done in the /home/$whoami/.5pm/config file.
   Here one can add days where there are specific options. This is done in the following format:
@@ -56,6 +57,7 @@ params () {
   if [ -z $more ]; then more=false; fi
   if [ -z $starts ]; then starts=false; fi
   if [ -z $version ]; then version=false; fi
+  if [ -z $snappy ]; then snappy=false; fi
   # Needed for script
   installdir=$( dirname "${BASH_SOURCE[0]}" )
   # Time stamps
@@ -195,6 +197,60 @@ nice_print () {
     echo "Workhours set to $workhours"
     echo "Hours worked are $workedhours"
   fi
+  if $snappy
+  then
+    snappy $leaveS
+  fi
+}
+
+# Make some snappy remark based upon $remaining
+snappy () {
+  # 8 hours remaining
+  if (( $remainingS <= 28800 )) && (( $remainingS > 25200 ))
+  then
+    echo "You just started!"
+  # 7 hours remaining
+  elif (( $remainingS <= 25200 )) && (( $remainingS > 21600 ))
+  then
+    echo "Seriously, you just started!"
+  # 6 hours remaining
+  elif (( $remainingS <= 21600 )) && (( $remainingS > 18000 ))
+  then
+    echo "Already tired?"
+  # 5 hours remaining
+  elif (( $remainingS <= 18000 )) && (( $remainingS > 14400 ))
+  then
+    echo "Trolrolrolrolr..."
+  # 4 hours remaining
+  elif (( $remainingS <= 14400 )) && (( $remainingS > 10800 ))
+  then
+    echo "luckily your you isn't very mentally challanging."
+  # 3 hours remaining
+  elif (( $remainingS <= 10800 )) && (( $remainingS > 7200 ))
+  then
+    echo "Don't you need to be working?"
+  # 2 hours remaining
+  elif (( $remainingS <= 7200 )) && (( $remainingS > 3600 ))
+  then
+    echo "Keep working, working, working..."
+  # 1 hour remaining
+  elif (( $remainingS <= 3600 )) && (( $remainingS > 1200 ))
+  then
+    echo "Hang in there, you can leave in about 1 hour."
+  # 20 min remaining
+  elif (( $remainingS <= 1200 )) && (( $remainingS > 600 ))
+  then
+    echo "You might want to check the traffic report..."
+  elif (( $remainingS <= 600 )) && (( $remaining > 300 ))
+  then
+    echo "No one would notice if you left now."
+  elif (( $remainingS <= 300 )) && (( $remaining > 0 ))
+  then
+    echo "You still working?"
+  elif (( $remainingS < 0 ))
+  then
+    echo "Do you need to compensate for something?"
+  fi
 }
 
 configparams
@@ -225,6 +281,10 @@ do
     --workhours|-w)
       shift
       workhours=$1
+      shift
+      ;;
+    --snappy|-sn)
+      snappy=true
       shift
       ;;
     --version|-v)
