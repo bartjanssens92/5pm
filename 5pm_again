@@ -241,10 +241,10 @@ snappy () {
   elif (( $remainingS <= 1200 )) && (( $remainingS > 600 ))
   then
     echo "You might want to check the traffic report..."
-  elif (( $remainingS <= 600 )) && (( $remaining > 300 ))
+  elif (( $remainingS <= 600 )) && (( $remainingS > 300 ))
   then
     echo "No one would notice if you left now."
-  elif (( $remainingS <= 300 )) && (( $remaining > 0 ))
+  elif (( $remainingS <= 300 )) && (( $remainingS > 0 ))
   then
     echo "You still working?"
   elif (( $remainingS < 0 ))
