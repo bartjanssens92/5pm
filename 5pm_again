@@ -55,6 +55,7 @@ params () {
   # Needed for script
   installdir=$( dirname "${BASH_SOURCE[0]}" )
   trafficcliscript='/home/bjanssens/Inuits/Scripts/Trafficcli/get_traffic_cli'
+  dateYmd=$( date +%Y%m%d )
   # Params needed for config
   username=$( whoami )
   # Directories and files
@@ -135,7 +136,7 @@ get_logintime () {
   if [ -f "$tempfile" ]
   then
     logintime=$( cat $tempfile )
-    debug Got uptime from tempfile
+    debug Got uptime from tempfile: $tempfile
   else
     if $starts
     then
