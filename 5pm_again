@@ -51,6 +51,9 @@ params () {
   if [ -z $version ]; then version=false; fi
   if [ -z $snappy ]; then snappy=false; fi
   if [ -z $traffic ]; then traffic=false; fi
+  if [ -z $onlytime ]; then onlytime=false; fi
+  if [ -z $onlyleft ]; then onlyleft=false; fi
+  if [ -z $onlysnappy ]; then onlysnappy=false; fi
   if [ -z $routes ]; then routes=''; fi
   # Needed for script
   installdir=$( dirname "${BASH_SOURCE[0]}" )
@@ -144,6 +147,12 @@ get_logintime () {
     else
       logintime=$( last | awk '{ print $7 }' | head -n 1 )
     fi
+    # By putting it in the shell line the script gets called before the user is logged in.
+    # This gets the current date in stead of the login time then.
+    if [ $logintime == '' ]
+    then
+      logintime=$( date +%H:%M )
+    fi
     echo "$logintime" > ${tempfile}
     debug Wrote logintime to tempfile
     # Clean up old tempfiles
@@ -190,21 +199,36 @@ get_version () {
 
 # Print the output
 nice_print () {
-  echo "It's 5pm at $leave"
-  echo "Time remaining is $remaining"
-  if $more
+  debug onlytime: $onlytime
+  debug onlyleft: $onlyleft
+  debug onlysnappy: $onlysnappy
+
+  if $onlytime
   then
-    echo "First logged in at $logintime"
-    echo "Workhours set to $workhours"
-    echo "Hours worked are $workedhours"
-  fi
-  if $snappy
+    echo "$leave"
+  elif $onlysnappy
   then
     snappy $leaveS
-  fi
-  if $traffic
+  elif $onlyleft
   then
-    get_traffictime
+    echo "$remaining"
+  else
+    echo "It's 5pm at $leave"
+    echo "Time remaining is $remaining"
+    if $more
+    then
+      echo "First logged in at $logintime"
+      echo "Workhours set to $workhours"
+      echo "Hours worked are $workedhours"
+    fi
+    if $snappy
+    then
+      snappy $leaveS
+    fi
+    if $traffic
+    then
+      get_traffictime
+    fi
   fi
 }
 
@@ -311,6 +335,18 @@ parse_options () {
         ;;
       --traffic)
         traffic=true
+        shift
+        ;;
+      --onlytime)
+        onlytime=true
+        shift
+        ;;
+      --onlysnappy)
+        onlysnappy=true
+        shift
+        ;;
+      --onlyleft)
+        onlyleft=true
         shift
         ;;
       *)
