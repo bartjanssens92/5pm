@@ -160,7 +160,7 @@ get_logintime () {
   fi
   debug logintime: $logintime
   logintimeH=$( echo $logintime | cut -d ':' -f1 )
-  logintimeM=$( echo $logintime | cut -d ':' -f2 )
+  logintimeM=$( echo $logintime | cut -d ':' -f2 | sed 's/^0{1}//g' )
   logintimeS=$(( $( echo $logintimeH | sed 's/^0//g' )*60*60 + $logintimeM*60 ))
 }
 
